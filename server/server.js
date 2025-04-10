@@ -17,3 +17,9 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+//Connect to MongoDB
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/messaging-app', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
