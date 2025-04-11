@@ -29,3 +29,13 @@ app.use('/api/auth', authRoutes);
 
 const messageRoutes = require('./routes/message');
 app.use('/api/messages', messageRoutes);
+//Set Up Socket.io for Real-time Messaging
+io.on('connection', (socket) => {
+  console.log('New client connected');
+  socket.on('sendMessage', (message) => {
+    io.emit('message', message);
+  });
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
+});
