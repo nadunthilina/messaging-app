@@ -26,3 +26,6 @@ mongoose.connect('mongodb://localhost:27017/messaging-app', {
 
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
+
+const messageRoutes = require('./routes/message');
+app.use('/api/messages', messageRoutes);
