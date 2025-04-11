@@ -23,3 +23,6 @@ mongoose.connect('mongodb://localhost:27017/messaging-app', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
