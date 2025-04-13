@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { Form, Button, Card, ListGroup, InputGroup } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const socket = io('http://localhost:5000');
 
@@ -9,7 +10,10 @@ const Chat = ({ user, setUser }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [recipient, setRecipient] = useState('');
+  const messagesEndRef = useRef(null); // For auto-scrolling
+  const navigate = useNavigate();
 
+  // Fetch messages when the component mounts
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -28,18 +32,28 @@ const Chat = ({ user, setUser }) => {
     return () => socket.off('message');
   }, [user]);
 
-  const sendMessage = (e) => {
+  // Auto-scroll to the latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const sendMessage = async (e) => {
     e.preventDefault();
     if (message.trim() && recipient.trim()) {
       const newMessage = { sender: user, recipient, content: message };
-      socket.emit('sendMessage', newMessage);
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setMessage('');
+      try {
+        await axios.post('http://localhost:5000/api/messages', newMessage); // Save to DB via API
+        socket.emit('sendMessage', newMessage); // Emit via Socket.io
+        setMessage('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
   const handleLogout = () => {
     setUser(null);
+    navigate('/');
   };
 
   return (
@@ -47,14 +61,24 @@ const Chat = ({ user, setUser }) => {
       <Card.Body className="d-flex flex-column">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <Card.Title>Chat as {user}</Card.Title>
-          <Button variant="outline-danger" onClick={handleLogout}>Logout</Button>
+          <div>
+            <Button variant="outline-primary" className="me-2" onClick={() => navigate('/settings')}>
+              Settings
+            </Button>
+            <Button variant="outline-danger" onClick={handleLogout}>Logout</Button>
+          </div>
         </div>
         <ListGroup variant="flush" style={{ flex: 1, overflowY: 'auto', marginBottom: '20px' }}>
           {messages.map((msg, index) => (
-            <ListGroup.Item key={index} className={msg.sender === user ? 'text-end' : 'text-start'}>
+            <ListGroup.Item
+              key={index}
+              className={msg.sender === user ? 'text-end bg-light' : 'text-start'}
+              style={{ borderRadius: '10px', margin: '5px 0' }}
+            >
               <strong>{msg.sender}:</strong> {msg.content}
             </ListGroup.Item>
           ))}
+          <div ref={messagesEndRef} />
         </ListGroup>
         <Form onSubmit={sendMessage}>
           <InputGroup className="mb-3">
