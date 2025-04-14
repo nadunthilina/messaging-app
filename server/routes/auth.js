@@ -33,6 +33,10 @@ router.post('/login', async (req, res) => {
 
 router.put('/update-profile', async (req, res) => {
   const { username, profilePhoto } = req.body;
+  console.log('Updating profile for username:', username);
+  if (!username || !profilePhoto) {
+    return res.status(400).json({ message: 'Username and profile photo are required' });
+  }
   try {
     const user = await User.findOneAndUpdate(
       { username },
@@ -45,6 +49,7 @@ router.put('/update-profile', async (req, res) => {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
+    console.error('Error updating profile:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
