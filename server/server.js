@@ -14,3 +14,8 @@ io.on('connection', (socket) => {
     console.log('Client disconnected');
   });
 });
+
+mongoose.connect('mongodb://localhost:27017/messaging-app', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
