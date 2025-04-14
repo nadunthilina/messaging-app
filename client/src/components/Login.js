@@ -3,11 +3,11 @@ import axios from 'axios';
 import { Form, Button, Card, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 
-const Login = ({ setUser }) => {
+const Login = ({ setUser, setProfilePhoto }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' or 'danger'
+  const [messageType, setMessageType] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -15,6 +15,7 @@ const Login = ({ setUser }) => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
       setUser(response.data.username);
+      setProfilePhoto(response.data.profilePhoto || '');
       setMessage('Login successful!');
       setMessageType('success');
       navigate('/');
