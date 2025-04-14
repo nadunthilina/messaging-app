@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
-import { Form, Button, Card, ListGroup, InputGroup } from 'react-bootstrap';
+import { Form, Button, Card, ListGroup, InputGroup, Image } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 const socket = io('http://localhost:5000');
 
-const Chat = ({ user, setUser }) => {
+const Chat = ({ user, setUser, profilePhoto }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [recipient, setRecipient] = useState('');
-  const messagesEndRef = useRef(null); // For auto-scrolling
+  const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fetch messages when the component mounts
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -32,7 +31,6 @@ const Chat = ({ user, setUser }) => {
     return () => socket.off('message');
   }, [user]);
 
-  // Auto-scroll to the latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -42,8 +40,8 @@ const Chat = ({ user, setUser }) => {
     if (message.trim() && recipient.trim()) {
       const newMessage = { sender: user, recipient, content: message };
       try {
-        await axios.post('http://localhost:5000/api/messages', newMessage); // Save to DB via API
-        socket.emit('sendMessage', newMessage); // Emit via Socket.io
+        await axios.post('http://localhost:5000/api/messages', newMessage);
+        socket.emit('sendMessage', newMessage);
         setMessage('');
       } catch (error) {
         console.error('Error sending message:', error);
@@ -60,7 +58,14 @@ const Chat = ({ user, setUser }) => {
     <Card style={{ width: '600px', height: '80vh', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
       <Card.Body className="d-flex flex-column">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <Card.Title>Chat as {user}</Card.Title>
+          <div className="d-flex align-items-center">
+            {profilePhoto ? (
+              <Image src={profilePhoto} roundedCircle width="40" height="40" className="me-2" />
+            ) : (
+              <div className="bg-secondary rounded-circle me-2" style={{ width: '40px', height: '40px' }}></div>
+            )}
+            <Card.Title>Chat as {user}</Card.Title>
+          </div>
           <div>
             <Button variant="outline-primary" className="me-2" onClick={() => navigate('/settings')}>
               Settings
